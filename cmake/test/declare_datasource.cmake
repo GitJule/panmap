@@ -83,5 +83,5 @@ function (declare_datasource)
         )
     endif ()
 
-    add_dependencies (${PROJECT_NAME}_test "${datasource_name}")
+    add_dependencies (panmap_test "${datasource_name}")
 endfunction ()

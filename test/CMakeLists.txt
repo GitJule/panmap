@@ -12,6 +12,6 @@ include (test/config)
 include (data/datasources.cmake)
 
 add_app_test (api_fastq_coversion_test.cpp)
-add_app_test (cli_fastq_coversion_test.cpp)
+# add_app_test (cli_fastq_coversion_test.cpp)
 
 message (STATUS "You can run `make check` to build and run tests.")

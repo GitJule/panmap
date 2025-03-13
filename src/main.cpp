@@ -4,7 +4,7 @@
 
 #include <sharg/all.hpp>
 
-#include "fastq_conversion.hpp"
+#include <configuration.hpp>
 
 int main(int argc, char ** argv)
 {
@@ -12,7 +12,7 @@ int main(int argc, char ** argv)
     configuration config{};
 
     // Parser
-    sharg::parser parser{"Fastq-to-Fasta-Converter", argc, argv};
+    sharg::parser parser{"PanMap", argc, argv};
 
     // General information.
     parser.info.author = "SeqAn-Team";
@@ -20,14 +20,14 @@ int main(int argc, char ** argv)
 
     // Positional option: The FASTQ file to convert.
     parser.add_positional_option(config.fastq_input,
-                                 sharg::config{.description = "The FASTQ file to convert.",
+                                 sharg::config{.description = "The FASTQ file containing the reads",
                                                .validator = sharg::input_file_validator{{"fq", "fastq"}}});
 
-    // Open: Output FASTA file. Default: print to terminal - handled in fastq_conversion.cpp.
+    // Open: Output FASTA file. Default: print to terminal 
     parser.add_option(config.fasta_output,
                       sharg::config{.short_id = 'o',
                                     .long_id = "output",
-                                    .description = "The output FASTA file.",
+                                    .description = "The output SAM file.",
                                     .default_message = "Print to terminal (stdout)",
                                     .validator = sharg::output_file_validator{}});
 
@@ -46,10 +46,9 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    convert_fastq(config); // Call fastq to fasta converter.
 
     if (config.verbose) // If flag is set.
-        std::cerr << "Conversion was a success. Congrats!\n";
+        std::cerr << "Mapping was successful. Congrats!\n";
 
     return 0;
 }

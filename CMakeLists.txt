@@ -30,8 +30,6 @@ CPMGetPackage (use_ccache) # Speeds up compilation by caching files that have be
 
 # Comment/Uncomment entries as needed.
 # If you change something here, make sure to add/remove the target in target_link_libraries of src/CMakeLists.txt.
-CPMGetPackage (fmindex) # FM-Index
-CPMGetPackage (hibf) # (Hierarchical) Interleaved Bloom Filter
 CPMGetPackage (seqan3) # Sequence analysis
 CPMGetPackage (sharg) # Argument parser
 

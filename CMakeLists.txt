@@ -32,9 +32,12 @@ CPMGetPackage (use_ccache) # Speeds up compilation by caching files that have be
 # If you change something here, make sure to add/remove the target in target_link_libraries of src/CMakeLists.txt.
 CPMGetPackage (seqan3) # Sequence analysis
 CPMGetPackage (sharg) # Argument parser
+CPMGetPackage (libjst)
+CPMGetPackage (libspm)
 
 # Add the application. This will include `src/CMakeLists.txt`.
 add_subdirectory (src)
+
 
 # An option to disable configuring and building the tests. Tests are enabled if this is the main CMakeLists.txt.
 # It can be used when calling CMake: `cmake .. -Dpanmap_TEST=OFF`.

@@ -8,7 +8,7 @@ cmake_minimum_required (VERSION 3.25)
 # You can add more external include paths of other projects that are needed for your project.
 add_library (panmap_lib STATIC main.cpp)
 target_include_directories (panmap_lib PUBLIC "${panmap_SOURCE_DIR}/include")
-target_link_libraries (panmap_lib PUBLIC seqan3::seqan3 sharg::sharg
+target_link_libraries (panmap_lib PUBLIC seqan3::seqan3 sharg::sharg libjst::libjst libspm::libspm
 )
 
 target_compile_options (panmap_lib PUBLIC "-pedantic" "-Wall" "-Wextra")

@@ -7,17 +7,6 @@
 
 # cmake-format: off
 
-# hibf
-set (HIBF_VERSION 8fb4898ea734c904277ccfb2402184b1cf058b91 CACHE STRING "" FORCE)
-CPMDeclarePackage (hibf
-                   NAME hibf
-                   GIT_TAG ${HIBF_VERSION} # main
-                   GITHUB_REPOSITORY seqan/hibf
-                   SYSTEM TRUE
-                   EXCLUDE_FROM_ALL TRUE
-                   OPTIONS "INSTALL_HIBF OFF" "CMAKE_MESSAGE_LOG_LEVEL WARNING"
-)
-
 # sharg
 set (SHARG_VERSION c81c1f858054c7114d4d0e82c1c5c2d78574cb5e CACHE STRING "" FORCE)
 CPMDeclarePackage (sharg
@@ -40,15 +29,25 @@ CPMDeclarePackage (seqan3
                    OPTIONS "INSTALL_SEQAN3 OFF" "CMAKE_MESSAGE_LOG_LEVEL WARNING"
 )
 
-# fmindex
-set (FMINDEX_VERSION 78c0235fce77b91c74eddcb73bf79d8393a7110a CACHE STRING "" FORCE)
-CPMDeclarePackage (fmindex
-                   NAME fmindex
-                   GIT_TAG ${FMINDEX_VERSION} # main
-                   GITHUB_REPOSITORY SGSSGene/fmindex-collection
+set (LIBJST_VERSION bb3da768840026bf62a5d9869c04da6c8460a34f)
+CPMDeclarePackage (libjst
+                   NAME libjst
+                   GIT_TAG ${LIBJST_VERSION}
+                   GITHUB_REPOSITORY rrahn/libjst
                    SYSTEM TRUE
                    EXCLUDE_FROM_ALL TRUE
-                   OPTIONS "CMAKE_MESSAGE_LOG_LEVEL WARNING"
+                   OPTIONS "LIBJST_DEVELOPER_MODE OFF" "CMAKE_MESSAGE_LOG_LEVEL WARNING"
+)
+
+# libspm
+set (LIBSPM_VERSION 094efd745853f617bc60456ca73262018d3e71d5)
+CPMDeclarePackage (libspm
+                   NAME libspm
+                   GIT_TAG ${LIBSPM_VERSION}
+                   GITHUB_REPOSITORY rrahn/libspm
+                   SYSTEM TRUE
+                   EXCLUDE_FROM_ALL TRUE
+                   OPTIONS "LIBSPM_DEVELOPER_MODE OFF" "CMAKE_MESSAGE_LOG_LEVEL WARNING"
 )
 
 # googletest

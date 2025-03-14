@@ -161,18 +161,9 @@ void run_program(std::filesystem::path const & reference_path,
     read_reference(reference_path, storage); // liest die Referenzdatei.
     map_reads(query_path, index_path, sam_path, storage, errors); // mappt die Reads gegen die Referenz
 }
- 
-struct cmd_arguments
-{
-    std::filesystem::path reference_path{}; // definiert ein Feld für den Pfad zur Referenzdatei
-    std::filesystem::path query_path{}; // für query datei 
-    std::filesystem::path index_path{}; // für Index Datei
-    std::filesystem::path sam_path{"out.sam"}; // definiert Feld für den Pfad zur SAM-Ausgabedatei mit einem Standardwert
-    uint8_t errors{0}; // definiert ein Feld für die maximale Anzahl von Fehlern
-};
 // Funktion zur Initialisierung des Argument-Parsers
 // Funktion, die den Argument-Parser konfiguriert
-void initialise_argument_parser(seqan3::argument_parser & parser, cmd_arguments & args)
+void initialise_argument_parser(seqan3::argument_parser & parser, configuration & args)
 {
     parser.info.author = "E. coli"; // setzt den Autor des Programms
     parser.info.short_description = "Map reads against a reference."; // setzt Beschreibung des Programms 
@@ -212,7 +203,7 @@ void initialise_argument_parser(seqan3::argument_parser & parser, cmd_arguments 
 int main(int argc, char const ** argv)
 {
     seqan3::argument_parser parser("Mapper", argc, argv);
-    cmd_arguments args{};
+    configuration args{};
  
     initialise_argument_parser(parser, args);
  

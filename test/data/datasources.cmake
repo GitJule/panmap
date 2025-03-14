@@ -31,3 +31,8 @@ declare_datasource (FILE downloaded.fasta # This is a custom name. It does not h
                     URL https://ftp.seqan.de/app-template/downloaded.fasta
                     URL_HASH SHA256=c3cb990ca1a25c7e31be3c6c2d009238d9ac9a44b2b7c143753c1e2881699077
 )
+
+declare_datasource (FILE local_5refs.jst # This is a custom name. It does not have to match the file name.
+                    URL ${CMAKE_SOURCE_DIR}/test/data/test_5refs.jst
+                    URL_HASH SHA256=ce5b3c884df5eaa39326b1270250946185422071b2f6d79f137ea184a2f66c32
+)

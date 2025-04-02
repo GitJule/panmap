@@ -33,6 +33,8 @@ declare_datasource (FILE downloaded.fasta # This is a custom name. It does not h
 )
 
 declare_datasource (FILE local_5refs.jst # This is a custom name. It does not have to match the file name.
-                    URL ${CMAKE_SOURCE_DIR}/test/data/test_5refs.jst
-                    URL_HASH SHA256=ce5b3c884df5eaa39326b1270250946185422071b2f6d79f137ea184a2f66c32
+                    URL ${CMAKE_SOURCE_DIR}/test/data/test.jst
+                   # URL_HASH SHA256=ce5b3c884df5eaa39326b1270250946185422071b2f6d79f137ea184a2f66c32
+             
+                   URL_HASH SHA256=b0f8aff1776fcd9106eee7c135573ee0322e877768b94afb1815d539fb454a3c
 )

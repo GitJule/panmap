@@ -1,59 +1,59 @@
-// SPDX-FileCopyrightText: 2006-2025 Knut Reinert & Freie Universität Berlin
-// SPDX-FileCopyrightText: 2016-2025 Knut Reinert & MPI für molekulare Genetik
-// SPDX-License-Identifier: CC0-1.0
+// // SPDX-FileCopyrightText: 2006-2025 Knut Reinert & Freie Universität Berlin
+// // SPDX-FileCopyrightText: 2016-2025 Knut Reinert & MPI für molekulare Genetik
+// // SPDX-License-Identifier: CC0-1.0
 
 #include <sharg/all.hpp>
 
-#include <configuration.hpp>
-/*
-int main(int argc, char ** argv)
-{
-    // Configuration
-    configuration config{};
+ #include <configuration.hpp>
+// /*
+// int main(int argc, char ** argv)
+// {
+//     // Configuration
+//     configuration config{};
 
-    // Parser
-    sharg::parser parser{"PanMap", argc, argv};
+//     // Parser
+//     sharg::parser parser{"PanMap", argc, argv};
 
-    // General information.
-    parser.info.author = "SeqAn-Team";
-    parser.info.version = "1.0.0";
+//     // General information.
+//     parser.info.author = "SeqAn-Team";
+//     parser.info.version = "1.0.0";
 
-    // Positional option: The FASTQ file to convert.
-    parser.add_positional_option(config.fastq_input,
-                                 sharg::config{.description = "The FASTQ file containing the reads",
-                                               .validator = sharg::input_file_validator{{"fq", "fastq"}}});
+//     // Positional option: The FASTQ file to convert.
+//     parser.add_positional_option(config.fastq_input,
+//                                  sharg::config{.description = "The FASTQ file containing the reads",
+//                                                .validator = sharg::input_file_validator{{"fq", "fastq"}}});
 
-    // Open: Output FASTA file. Default: print to terminal 
-    parser.add_option(config.fasta_output,
-                      sharg::config{.short_id = 'o',
-                                    .long_id = "output",
-                                    .description = "The output SAM file.",
-                                    .default_message = "Print to terminal (stdout)",
-                                    .validator = sharg::output_file_validator{}});
+//     // Open: Output FASTA file. Default: print to terminal 
+//     parser.add_option(config.fasta_output,
+//                       sharg::config{.short_id = 'o',
+//                                     .long_id = "output",
+//                                     .description = "The output SAM file.",
+//                                     .default_message = "Print to terminal (stdout)",
+//                                     .validator = sharg::output_file_validator{}});
 
-    // Flag: Verose output.
-    parser.add_flag(
-        config.verbose,
-        sharg::config{.short_id = 'v', .long_id = "verbose", .description = "Give more detailed information."});
+//     // Flag: Verose output.
+//     parser.add_flag(
+//         config.verbose,
+//         sharg::config{.short_id = 'v', .long_id = "verbose", .description = "Give more detailed information."});
 
-    try
-    {
-        parser.parse(); // Trigger command line parsing.
-    }
-    catch (sharg::parser_error const & ext) // Catch user errors.
-    {
-        std::cerr << "Parsing error. " << ext.what() << '\n'; // Give error message.
-        return -1;
-    }
+//     try
+//     {
+//         parser.parse(); // Trigger command line parsing.
+//     }
+//     catch (sharg::parser_error const & ext) // Catch user errors.
+//     {
+//         std::cerr << "Parsing error. " << ext.what() << '\n'; // Give error message.
+//         return -1;
+//     }
 
 
-    if (config.verbose) // If flag is set.
-        std::cerr << "Mapping was successful. Congrats!\n";
+//     if (config.verbose) // If flag is set.
+//         std::cerr << "Mapping was successful. Congrats!\n";
 
-    return 0;
-}
+//     return 0;
+// }
 
-*/
+// */
 
 #    include <fstream>
 #    include <span>
@@ -71,35 +71,50 @@ int main(int argc, char ** argv)
  
 struct reference_storage_t
 {   std::vector<std::string> ids;// Vektor zur Speicherung der Identifikatoren der Referenzsequenzen
-    std::vector<std::vector<seqan3::dna5>> seqs; // Vektor von Vektoren zur Speicherung der Referenzsequenzen selbst
+    std::vector<std::span<const seqan3::dna5>> seqs; // Vermeidet Kopien der Referenzsequenzen durch non-owning views
 };
  
 void read_reference(std::filesystem::path const & reference_path, reference_storage_t & storage) // Funktion, die Referenzdatei liest und Daten in reference_storage_t-Struktur speichert
 {
-    seqan3::sequence_file_input reference_in{reference_path}; // öffnet Referenzdatei
-    for (auto && record : reference_in) // beginnt eine Schleife, die jeden Eintrag in der Referenzdatei durchläuft
+{
+    seqan3::sequence_file_input reference_in{reference_path};
+   
+    for (auto && record : reference_in)
     {
-        storage.ids.push_back(record.id()); // fügt die Identifikator des aktuellen Eintrags zur Liste der Identifikatoren hinzu
-        storage.seqs.push_back(record.sequence()); // fügt die Sequenz des aktuellen Eintrags zur Liste der Sequenzen hinzu
+        storage.ids.emplace_back(std::move(record.id()));
+        storage.seqs.emplace_back(record.sequence());
     }
 }
+    // seqan3::sequence_file_input reference_in{reference_path}; // öffnet Referenzdatei
+    // size_t count = std::distance(reference_in.begin(), reference_in.end());
+    // storage.ids.reserve(count);
+    // storage.seqs.reserve(count);
 
+    // reference_in.seek_begin();  //Zurückspulen bei single pass Iteratoren
+
+    // for (auto && record : reference_in) // beginnt eine Schleife, die jeden Eintrag in der Referenzdatei durchlÃ¤uft
+    // {
+    //     storage.ids.emplace_back(std::move(record.id())); // reduziert Kopien
+    //     storage.seqs.emplace_back(record.sequence() | std::views::all); // views behalten Zugriff auf Originaldaten
+    // }
+
+// verhindert doppelte Ids die später zu mapping problemen führen können
+}
 // Funktion, die Reads gegen eine Referenz mappt
- 
 void map_reads(std::filesystem::path const & query_path, // Funktion, die Reads gegen eine Referenz mappt
                std::filesystem::path const & index_path, 
                std::filesystem::path const & sam_path,
                reference_storage_t & storage,
                uint8_t const errors)
 {
-    seqan3::bi_fm_index<seqan3::dna5, seqan3::text_layout::collection> index; // deklariert einen bidirektionalen FM-Index für DNA-Sequenzen
+    seqan3::bi_fm_index<seqan3::dna5, seqan3::text_layout::collection> index; // deklariert einen bidirektionalen FM-Index fÃ¼r DNA-Sequenzen
     {
-        std::ifstream is{index_path, std::ios::binary}; //  öffnet die Indexdatei im binären Modus
-        cereal::BinaryInputArchive iarchive{is}; // erstellt einen binären Archiv-Reader für die Serialisierung
-        iarchive(index); // lädt den Index aus der Datei
+        std::ifstream is{index_path, std::ios::binary}; //  Ã¶ffnet die Indexdatei im binÃ¤ren Modus
+        cereal::BinaryInputArchive iarchive{is}; // erstellt einen binÃ¤ren Archiv-Reader fÃ¼r die Serialisierung
+        iarchive(index); // lÃ¤dt den Index aus der Datei
     }
  
-    seqan3::sequence_file_input query_file_in{query_path}; //  öffnet die Query-Datei
+    seqan3::sequence_file_input query_file_in{query_path}; //  Ã¶ffnet die Query-Datei
  
     //  initialisiert die SAM-Ausgabedatei mit bestimmten Feldern
     seqan3::sam_file_output sam_out{sam_path,
@@ -111,7 +126,7 @@ void map_reads(std::filesystem::path const & query_path, // Funktion, die Reads 
                                                    seqan3::field::qual,
                                                    seqan3::field::mapq>{}};
 
-    // definiert die Suchkonfiguration mit einer maximalen Anzahl von Fehlern und der Option, alle besten Treffer zu berücksichtigen
+    // definiert die Suchkonfiguration mit einer maximalen Anzahl von Fehlern und der Option, alle besten Treffer zu berÃ¼cksichtigen
     seqan3::configuration const search_config =
         seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{errors}}
         | seqan3::search_cfg::hit_all_best{};
@@ -125,20 +140,20 @@ void map_reads(std::filesystem::path const & query_path, // Funktion, die Reads 
         | seqan3::align_cfg::edit_scheme | seqan3::align_cfg::output_alignment{}
         | seqan3::align_cfg::output_begin_position{} | seqan3::align_cfg::output_score{};
  
-    for (auto && record : query_file_in) // beginnt Schleife, die jeden Eintrag in der Query-Datei durchläuft
+    for (auto && record : query_file_in) // beginnt Schleife, die jeden Eintrag in der Query-Datei durchlÃ¤uft
     {
         auto & query = record.sequence(); // referenziert die Sequenz des aktuellen Eintrags
-        for (auto && result : search(query, index, search_config)) // beginnt Schleife, die die Suchergebnisse für die aktuelle Sequenz durchläuft
+        for (auto && result : search(query, index, search_config)) // beginnt Schleife, die die Suchergebnisse fÃ¼r die aktuelle Sequenz durchlÃ¤uft
         {
             size_t start = result.reference_begin_position() ? result.reference_begin_position() - 1 : 0; // berechnet Startpunkt der Referenzsequenz basierend auf dem Suchergebnis
             std::span text_view{std::data(storage.seqs[result.reference_id()]) + start, query.size() + 1}; // erstellt Span, der Teil der Referenzsequenz darstellt, beginnend am berechneten Startpunkt
  
-            for (auto && alignment : seqan3::align_pairwise(std::tie(text_view, query), align_config)) // beginnt Schleife, die Ausrichtungsergebnisse für die aktuelle Sequenz durchläuft
+            for (auto && alignment : seqan3::align_pairwise(std::tie(text_view, query), align_config)) // beginnt Schleife, die Ausrichtungsergebnisse fÃ¼r die aktuelle Sequenz durchlÃ¤uft
             {
                 auto cigar = seqan3::cigar_from_alignment(alignment.alignment()); // wandelt das Alignment in einen CIGAR-String um
                 size_t ref_offset = alignment.sequence1_begin_position() + 2 + start; // berechnet Offset in der Referenzsequenz basierend auf der Ausrichtung
-                size_t map_qual = 60u + alignment.score(); // berechnet die Mapping-Qualität basierend auf dem Ausrichtungsscore
-                //fügt einen neuen Eintrag zur SAM-Datei hinzu
+                size_t map_qual = 60u + alignment.score(); // berechnet die Mapping-QualitÃ¤t basierend auf dem Ausrichtungsscore
+                //fÃ¼gt einen neuen Eintrag zur SAM-Datei hinzu
                 sam_out.emplace_back(query,
                                      record.id(),
                                      storage.ids[result.reference_id()],
@@ -150,7 +165,7 @@ void map_reads(std::filesystem::path const & query_path, // Funktion, die Reads 
         }
     }
 }
-// Funktion, die das Programm ausführt
+// Funktion, die das Programm ausfÃ¼hrt
 void run_program(std::filesystem::path const & reference_path,
                  std::filesystem::path const & query_path,
                  std::filesystem::path const & index_path,
@@ -168,31 +183,31 @@ void initialise_argument_parser(seqan3::argument_parser & parser, configuration 
     parser.info.author = "E. coli"; // setzt den Autor des Programms
     parser.info.short_description = "Map reads against a reference."; // setzt Beschreibung des Programms 
     parser.info.version = "1.0.0"; // setzt Version des Programms 
-    parser.add_option(args.reference_path, // fügt eine Option für den Pfad zur Referenzdatei hinzu
+    parser.add_option(args.reference_path, // fÃ¼gt eine Option fÃ¼r den Pfad zur Referenzdatei hinzu
                       'r',
                       "reference",
                       "The path to the reference.",
                       seqan3::option_spec::required,
                       seqan3::input_file_validator{{"fa", "fasta"}});
-    parser.add_option(args.query_path, // fügt eine Option für den Pfad zur Query Datei hinzu
+    parser.add_option(args.query_path, // fÃ¼gt eine Option fÃ¼r den Pfad zur Query Datei hinzu
                       'q',
                       "query",
                       "The path to the query.",
                       seqan3::option_spec::required,
                       seqan3::input_file_validator{{"fq", "fastq"}});
-    parser.add_option(args.index_path, // fügt eine Option für den Pfad zur Indexdatei hinzu
+    parser.add_option(args.index_path, // fÃ¼gt eine Option fÃ¼r den Pfad zur Indexdatei hinzu
                       'i',
                       "index",
                       "The path to the index.",
                       seqan3::option_spec::required,
                       seqan3::input_file_validator{{"index"}});
-    parser.add_option(args.sam_path, // fügt eine Option für den Pfad zur SAM Ausgabedatei hinzu
+    parser.add_option(args.sam_path, // fÃ¼gt eine Option fÃ¼r den Pfad zur SAM Ausgabedatei hinzu
                       'o',
                       "output",
                       "The output SAM file path.",
                       seqan3::option_spec::standard,
                       seqan3::output_file_validator{seqan3::output_file_open_options::create_new, {"sam"}});
-    parser.add_option(args.errors, // fügt eine Option für die maximale Anzahl von Feldern hinzu
+    parser.add_option(args.errors, // fÃ¼gt eine Option fÃ¼r die maximale Anzahl von Feldern hinzu
                       'e',
                       "error",
                       "Maximum allowed errors.",

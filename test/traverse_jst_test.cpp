@@ -18,7 +18,7 @@
 
 TEST(test, traverse){
     using namespace spm;
-    std::filesystem::path rcsstorepath{std::string{DATADIR}+"local_5refs.jst"};
+    auto rcsstorepath = std::filesystem::path{std::string{DATADIR}}.concat("test.jst");
     rcs_store_t store = loadrcsstore(rcsstorepath);
     auto query = "ACGC"_dna5;
     spm::horspool_matcher matcher{query};
@@ -45,4 +45,4 @@ TEST(test, traverse){
     }
 
 }
-   
+

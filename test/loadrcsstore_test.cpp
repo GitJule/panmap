@@ -13,12 +13,7 @@ TEST(test, create_rcs) {
    using variant_t = std::ranges::range_value_t<cms_t>;
    auto dom = rcs_store.variants().coverage_domain();
    rcs_store.add (variant_t{libjst::breakpoint{3,4},"C"_dna5, coverage_t{{0,2},dom}});
-   {
-    std::ofstream ofs{"/home/julia/panmap/build/test.jst"};
-    cereal::BinaryOutputArchive boa{ofs};
-    rcs_store.save (boa);
-   }
-   EXPECT_EQ(rcs_store.size(), 5);
+   EXPECT_EQ(rcs_store.size(), 5);   
 }
 
 TEST(test, loadrcsstore){

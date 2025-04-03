@@ -8,10 +8,10 @@
 # cmake-format: off
 
 # sharg
-set (SHARG_VERSION c81c1f858054c7114d4d0e82c1c5c2d78574cb5e CACHE STRING "" FORCE)
+set (PANMAP_SHARG_VERSION c81c1f858054c7114d4d0e82c1c5c2d78574cb5e CACHE STRING "" FORCE)
 CPMDeclarePackage (sharg
                    NAME sharg
-                   GIT_TAG ${SHARG_VERSION} # main
+                   GIT_TAG ${PANMAP_SHARG_VERSION} # main
                    GITHUB_REPOSITORY seqan/sharg-parser
                    SYSTEM TRUE
                    EXCLUDE_FROM_ALL TRUE
@@ -19,20 +19,20 @@ CPMDeclarePackage (sharg
 )
 
 # seqan3
-set (SEQAN3_VERSION 2863cbbe336a51c21932c69635e814b6e3a8a4ce CACHE STRING "" FORCE)
+set (PANMAP_SEQAN3_VERSION 2863cbbe336a51c21932c69635e814b6e3a8a4ce CACHE STRING "" FORCE)
 CPMDeclarePackage (seqan3
                    NAME seqan3
-                   GIT_TAG ${SEQAN3_VERSION} # main
+                   GIT_TAG ${PANMAP_SEQAN3_VERSION} # main
                    GITHUB_REPOSITORY seqan/seqan3
                    SYSTEM TRUE
                    EXCLUDE_FROM_ALL TRUE
                    OPTIONS "INSTALL_SEQAN3 OFF" "CMAKE_MESSAGE_LOG_LEVEL WARNING"
 )
 
-set (LIBJST_VERSION bb3da768840026bf62a5d9869c04da6c8460a34f)
+set (PANMAP_LIBJST_VERSION bb3da768840026bf62a5d9869c04da6c8460a34f)
 CPMDeclarePackage (libjst
                    NAME libjst
-                   GIT_TAG ${LIBJST_VERSION}
+                   GIT_TAG ${PANMAP_LIBJST_VERSION}
                    GITHUB_REPOSITORY rrahn/libjst
                    SYSTEM TRUE
                    EXCLUDE_FROM_ALL TRUE
@@ -40,10 +40,10 @@ CPMDeclarePackage (libjst
 )
 
 # libspm
-set (LIBSPM_VERSION 094efd745853f617bc60456ca73262018d3e71d5)
+set (PAN_MAP_LIBSPM_VERSION 9b1468df9b10913b9e16dd07062d85ba6f948634)
 CPMDeclarePackage (libspm
                    NAME libspm
-                   GIT_TAG ${LIBSPM_VERSION}
+                   GIT_TAG ${PAN_MAP_LIBSPM_VERSION}
                    GITHUB_REPOSITORY rrahn/libspm
                    SYSTEM TRUE
                    EXCLUDE_FROM_ALL TRUE
@@ -51,10 +51,10 @@ CPMDeclarePackage (libspm
 )
 
 # googletest
-set (GOOGLETEST_VERSION 1.16.0 CACHE STRING "" FORCE)
+set (PANMAP_GOOGLETEST_VERSION 1.16.0 CACHE STRING "" FORCE)
 CPMDeclarePackage (googletest
                    NAME GTest
-                   VERSION ${GOOGLETEST_VERSION}
+                   VERSION ${PANMAP_GOOGLETEST_VERSION}
                    GITHUB_REPOSITORY google/googletest
                    SYSTEM TRUE
                    EXCLUDE_FROM_ALL TRUE
@@ -62,10 +62,10 @@ CPMDeclarePackage (googletest
 )
 
 # use_ccache
-set (USE_CCACHE_VERSION d2a54ef555b6fc2d496a4c9506dbeb7cf899ce37 CACHE STRING "" FORCE)
+set (PANMAP_USE_CCACHE_VERSION d2a54ef555b6fc2d496a4c9506dbeb7cf899ce37 CACHE STRING "" FORCE)
 CPMDeclarePackage (use_ccache
                    NAME use_ccache
-                   GIT_TAG ${USE_CCACHE_VERSION} # main
+                   GIT_TAG ${PANMAP_USE_CCACHE_VERSION} # main
                    GITHUB_REPOSITORY seqan/cmake-scripts
                    SOURCE_SUBDIR ccache
                    SYSTEM TRUE

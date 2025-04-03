@@ -18,11 +18,11 @@ TEST(test, create_rcs) {
     cereal::BinaryOutputArchive boa{ofs};
     rcs_store.save (boa);
    }
-   EXPECT_EQ(rcs_store.size(), 5);   
+   EXPECT_EQ(rcs_store.size(), 5);
 }
 
 TEST(test, loadrcsstore){
-    std::filesystem::path rcsstorepath{std::string{DATADIR}+"local_5refs.jst"};
+    auto rcsstorepath = std::filesystem::path{std::string{DATADIR}}.concat("test.jst");
     rcs_store_t store = loadrcsstore(rcsstorepath);
     EXPECT_EQ(store.size(), 5);
 }

@@ -6,12 +6,21 @@
 
 #include <filesystem>
 
+// struct configuration
+// {
+//     std::filesystem::path reference_path{}; // definiert ein Feld für den Pfad zur Referenzdatei
+//     std::filesystem::path query_path{}; // für query datei 
+//     std::filesystem::path index_path{}; // für Index Datei
+//     std::filesystem::path sam_path{"out.sam"}; // definiert Feld für den Pfad zur SAM-Ausgabedatei mit einem Standardwert
+//     uint8_t errors{0}; 
+//     bool verbose{}; // Default is false.
+// };
+
+
 struct configuration
 {
-    std::filesystem::path reference_path{}; // definiert ein Feld für den Pfad zur Referenzdatei
-    std::filesystem::path query_path{}; // für query datei 
-    std::filesystem::path index_path{}; // für Index Datei
-    std::filesystem::path sam_path{"out.sam"}; // definiert Feld für den Pfad zur SAM-Ausgabedatei mit einem Standardwert
-    uint8_t errors{0}; 
-    bool verbose{}; // Default is false.
+    std::filesystem::path reference_path{};
+    std::filesystem::path query_path{};
+    std::filesystem::path sam_path{"out.sam"};
+    uint8_t errors{0};
 };

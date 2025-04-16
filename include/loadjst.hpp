@@ -8,25 +8,23 @@
 #include <fstream>
 #include <string>
 
-#include <cereal/archives/binary.hpp>
-
 #include <globaltypes.hpp>
 
-rcs_store_t loadrcsstore(std::filesystem::path const & rcsstore_path)
+struct JST_Data {
+    std::vector<std::string> ids;
+    std::vector<seqan3::dna5_vector> sequences;
+};
+
+JST_Data loadjst(std::filesystem::path const & path)
 {
-    using namespace std::literals;
-    std::ifstream rcsstream{rcsstore_path};
-    if (!rcsstream.good())
-    {
-        throw std::runtime_error{
-            "Couldn`t read file: "s + rcsstore_path.string() +
-            " (Error: "s + std::strerror(errno) + ")"s};
+    JST_Data data;
+    seqan3::sequence_file_input fin{path};
+
+    for (auto&&record : fin){
+        data.ids.push_back(std::move(record.id()));
+        data.sequences.push_back(record.sequence());
     }
 
-    rcs_store_t rcsstore{};
-    {
-        cereal::BinaryInputArchive rcsarchive{rcsstream};
-        rcsstore.load(rcsarchive);
-    }
-    return rcsstore;
+    return data;
 }
+

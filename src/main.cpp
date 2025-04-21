@@ -3,6 +3,7 @@
 // // SPDX-License-Identifier: CC0-1.0
 
 #include <sharg/all.hpp>
+#include <sharg/parser.hpp>
 #include <fstream>
 #include <span>
 #include <ranges>
@@ -41,7 +42,7 @@
 //     iterator end() const { return data.sequences.end(); }
 // };
 
-std::vector<libjst::seek_position> jst_search(const rcs_strore_t& jst_data, const reference_t & read)
+std::vector<libjst::seek_position> jst_search(const rcs_store_t& jst_data, const reference_t & read)
 {
     // auto config = seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{0}} //keine fehler erlaubt
     //             | seqan3::search_cfg::hit_all_best{}; // beste treffer zurückgeben
@@ -62,16 +63,22 @@ std::vector<libjst::seek_position> jst_search(const rcs_strore_t& jst_data, cons
     for (auto it = oblivious_path.begin(); it != oblivious_path.end(); ++it) {
          auto && cargo = *it;
          matcher(cargo.sequence(), [&] ([[maybe_unused]] auto && label_finder) {
-            hits.push_back(cargo.position().index());
-            std::cout<<"Found hit. Yayy." << cargo.position() <<"\n";
-            // callback(query, match_position{.tree_position{cargo.position()},
-                                        //    .label_offset{std::ranges::ssize(cargo.sequence()) - seqan2::endPosition(label_finder)}});
+            hits.push_back(cargo.position());  // Direkter Zugriff über cargo
+            std::cout << "Found hit. Yayy. " << cargo.position() << "\n";
         });
+        
+        //  matcher(cargo.sequence(), [&] ([[maybe_unused]] auto && label_finder) {
+        //     hits.push_back(search_tree.create_position(*it));  // Position speichern [2]
+        //     // hits.push_back(cargo.position());
+        //     std::cout<<"Found hit. Yayy." << cargo.position() <<"\n";
+        //     // callback(query, match_position{.tree_position{cargo.position()},
+        //                                 //    .label_offset{std::ranges::ssize(cargo.sequence()) - seqan2::endPosition(label_finder)}});
+        // });
 }
 
-    std::vector<size_t> hits;
-    for (auto&& result : results)
-        hits.push_back(result.reference_begin_position());
+    // std::vector<size_t> hits;
+    // for (auto&& result : results)
+    //     hits.push_back(result.reference_begin_position());
     
     return hits;
 }
@@ -79,7 +86,7 @@ std::vector<libjst::seek_position> jst_search(const rcs_strore_t& jst_data, cons
 void map_reads(std::filesystem::path const & query_path,
     std::filesystem::path const & sam_path,
     const rcs_store_t & jst_data,
-    uint8_t const errors)
+    [[maybe_unused]] uint8_t const errors)
 {
     sequence_file_t query_file_in{query_path};
     seqan3::sam_file_output sam_out{sam_path, seqan3::fields<seqan3::field::seq,
@@ -109,9 +116,9 @@ void map_reads(std::filesystem::path const & query_path,
         auto hits = jst_search(jst_data, query);
        
         for (auto hit_pos : hits)
-            {
-                std::span text_view{std::data(jst_data.sequences[hit_pos]), query.size() +1};
-                std::cout <<"seek position:"<< text_view << "\n";
+        {
+                // std::span text_view{std::data(jst_data.sequences[hit_pos]), query.size() +1};
+                std::cout <<"seek position:"<< hit_pos << "\n";
             
             //     for (auto&& alignment : seqan3::align_pairwise(std::tie(text_view,query), align_config))
             // {
@@ -146,7 +153,7 @@ map_reads(query_path,
 }
 
 // Funktion, die den Argument-Parser konfiguriert
-void initialise_argument_parser(seqan3::argument_parser & parser, configuration & args)
+void initialise_argument_parser(sharg::parser & parser, configuration & args)
 {
     parser.info.author = "Julia Bodnar"; // setzt den Autor des Programms
     parser.info.short_description = "JST-based read mapper"; // setzt Beschreibung des Programms 

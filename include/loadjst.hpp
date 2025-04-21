@@ -19,6 +19,7 @@ struct JST_Data {
 rcs_store_t loadjst(std::filesystem::path const & rcsstore_path)
 {
     rcs_store_t rcsstore{};
+    std::ifstream rcsstream(rcsstore_path, std::ios::binary);
     {
         cereal::BinaryInputArchive rcsarchive{rcsstream};
         rcsstore.load(rcsarchive);

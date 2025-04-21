@@ -13,3 +13,11 @@ using reference_t = std::vector<alphabet_t>;
 
 using cms_t = libjst::compressed_multisequence<reference_t, coverage_t>;
 using rcs_store_t = libjst::rcs_store<reference_t, cms_t>;
+
+struct sequence_input_traits : public seqan3::sequence_file_input_default_traits_dna
+{
+    using sequence_alphabet = alphabet_t;
+    using sequence_legal_alphabet = spm::dna15; //
+    static_assert (seqan3::explicitly_convertible_t0<sequence_legal_alphabet, sequence_alphabet>);
+};
+using sequence_file_t = seqan3::sequence_file_input<sequence_input_traits>;

@@ -15,32 +15,9 @@ struct JST_Data {
     std::vector<seqan3::dna5_vector> sequences;
 };
 
-JST_Data loadjst(std::filesystem::path const & path)
+
+rcs_store_t loadjst(std::filesystem::path const & rcsstore_path)
 {
-    JST_Data data;
-    seqan3::sequence_file_input fin{path};
-
-    for (auto&&record : fin){
-        data.ids.push_back(std::move(record.id()));
-        data.sequences.push_back(record.sequence());
-    }
-
-    return data;
-}
-
-#include <cereal/archives/binary.hpp>
-
-rcs_store_t loadrcsstore(std::filesystem::path const & rcsstore_path)
-{
-    using namespace std::literals;
-    std::ifstream rcsstream{rcsstore_path};
-    if (!rcsstream.good())
-    {
-        throw std::runtime_error{
-            "Couldn`t read file: "s + rcsstore_path.string() +
-            " (Error: "s + std::strerror(errno) + ")"s};
-    }
-
     rcs_store_t rcsstore{};
     {
         cereal::BinaryInputArchive rcsarchive{rcsstream};

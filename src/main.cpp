@@ -41,13 +41,13 @@
 //     iterator end() const { return data.sequences.end(); }
 // };
 
-std::vector<size_t> jst_search(const auto& jst_data, const reference_t & read)
+std::vector<libjst::seek_position> jst_search(const rcs_strore_t& jst_data, const reference_t & read)
 {
     // auto config = seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{0}} //keine fehler erlaubt
     //             | seqan3::search_cfg::hit_all_best{}; // beste treffer zurückgeben
     
     // auto results = seqan3::search(read, jst_adapter{jst_data}, config);
-    spm::horspool_matcher matcher{query};
+    spm::horspool_matcher matcher{read};
 
     auto search_tree = libjst::make_volatile(jst_data) | libjst::labelled()
     | libjst::coloured()
@@ -57,10 +57,12 @@ std::vector<size_t> jst_search(const auto& jst_data, const reference_t & read)
     | libjst::merge() // make big nodes
     | libjst::seek();
 
+    std::vector<libjst::seek_position> hits;
     libjst::tree_traverser_base oblivious_path{search_tree};
     for (auto it = oblivious_path.begin(); it != oblivious_path.end(); ++it) {
          auto && cargo = *it;
          matcher(cargo.sequence(), [&] ([[maybe_unused]] auto && label_finder) {
+            hits.push_back(cargo.position().index());
             std::cout<<"Found hit. Yayy." << cargo.position() <<"\n";
             // callback(query, match_position{.tree_position{cargo.position()},
                                         //    .label_offset{std::ranges::ssize(cargo.sequence()) - seqan2::endPosition(label_finder)}});
@@ -76,7 +78,7 @@ std::vector<size_t> jst_search(const auto& jst_data, const reference_t & read)
 
 void map_reads(std::filesystem::path const & query_path,
     std::filesystem::path const & sam_path,
-    const JST_Data & jst_data,
+    const rcs_store_t & jst_data,
     uint8_t const errors)
 {
     sequence_file_t query_file_in{query_path};
@@ -109,21 +111,22 @@ void map_reads(std::filesystem::path const & query_path,
         for (auto hit_pos : hits)
             {
                 std::span text_view{std::data(jst_data.sequences[hit_pos]), query.size() +1};
-
-                for (auto&& alignment : seqan3::align_pairwise(std::tie(text_view,query), align_config))
-            {
-            auto cigar = seqan3::cigar_from_alignment(alignment.alignment()); // wandelt das Alignment in einen CIGAR-String um
-            size_t ref_offset = alignment.sequence1_begin_position() + 2; // berechnet Offset in der Referenzsequenz basierend auf der Ausrichtung
-            size_t map_qual = 60u + alignment.score(); // berechnet die Mapping-Qualität basierend auf dem Ausrichtungsscore
-                //fängt einen neuen Eintrag zur SAM-Datei hinzu
-                sam_out.emplace_back(query,
-                                     record.id(),
-                                     jst_data.ids[hit_pos], 
-                                     ref_offset,
-                                     cigar,
-                                     record.base_qualities(),
-                                     map_qual);
-            }
+                std::cout <<"seek position:"<< text_view << "\n";
+            
+            //     for (auto&& alignment : seqan3::align_pairwise(std::tie(text_view,query), align_config))
+            // {
+            // auto cigar = seqan3::cigar_from_alignment(alignment.alignment()); // wandelt das Alignment in einen CIGAR-String um
+            // size_t ref_offset = alignment.sequence1_begin_position() + 2; // berechnet Offset in der Referenzsequenz basierend auf der Ausrichtung
+            // size_t map_qual = 60u + alignment.score(); // berechnet die Mapping-Qualität basierend auf dem Ausrichtungsscore
+            //     //fängt einen neuen Eintrag zur SAM-Datei hinzu
+            //     sam_out.emplace_back(query,
+            //                          record.id(),
+            //                          jst_data.ids[hit_pos], 
+            //                          ref_offset,
+            //                          cigar,
+            //                          record.base_qualities(),
+            //                          map_qual);
+            // }
         }
     }
 }
@@ -150,28 +153,32 @@ void initialise_argument_parser(seqan3::argument_parser & parser, configuration 
     parser.info.version = "1.0.0"; // setzt Version des Programms 
 
     parser.add_option(args.reference_path, // fügt eine Option für den Pfad zur Referenzdatei hinzu
-                      'r',
-                      "reference",
-                      "referenzgenome (JST-format)",
-                      sharg::config{.required = true, .validator = sharg::input_file_validator{{"jst"}}});
+                      sharg::config{.short_id = 'r',
+                                    .long_id= "reference", 
+                                    .description = "referenzgenome (JST-format)",
+                                    .required = true, 
+                                    .validator = sharg::input_file_validator{{"jst"}}});
                     
     parser.add_option(args.query_path, 
-                      'q',
-                      "query",
-                      "Input reads",
-                      sharg::config{.required = true, .validator = sharg::input_file_validator{{"fq","fastq"}}});
+                      sharg::config{.short_id = 'q',
+                                    .long_id= "query", 
+                                    .description = "Input reads", 
+                                    .required = true, 
+                                    .validator = sharg::input_file_validator{{"fq","fastq"}}});
 
     parser.add_option(args.sam_path, // fügt eine Option für den Pfad zur SAM Ausgabedatei hinzu
-                      'o',
-                      "output",
-                      "The output SAM file.",
-                      sharg::config{.validator = sharg::output_file_validator{{"sam"}}});
+                      sharg::config{.short_id = 'o',
+                                    .long_id= "output", 
+                                    .description = "The output SAM file", 
+                                    .required = true, 
+                                    .validator = sharg::output_file_validator{{"sam"}}});
 
     parser.add_option(args.errors, // fügt eine Option für die maximale Anzahl von Feldern hinzu
-                      'e',
-                      "error",
-                      "Maximum allowed errors.",
-                      sharg::config{.validator = sharg::arithmetic_range_validator{0, 4}});                 
+                      sharg::config{.short_id = 'e',
+                                    .long_id= "error", 
+                                    .description = "Maximum allowed errors.", 
+                                    .required = true, 
+                                    .validator = sharg::arithmetic_range_validator{0, 4}});                         
 }
 
 int main(int argc, char const** argv)

@@ -28,3 +28,23 @@ JST_Data loadjst(std::filesystem::path const & path)
     return data;
 }
 
+#include <cereal/archives/binary.hpp>
+
+rcs_store_t loadrcsstore(std::filesystem::path const & rcsstore_path)
+{
+    using namespace std::literals;
+    std::ifstream rcsstream{rcsstore_path};
+    if (!rcsstream.good())
+    {
+        throw std::runtime_error{
+            "Couldn`t read file: "s + rcsstore_path.string() +
+            " (Error: "s + std::strerror(errno) + ")"s};
+    }
+
+    rcs_store_t rcsstore{};
+    {
+        cereal::BinaryInputArchive rcsarchive{rcsstream};
+        rcsstore.load(rcsarchive);
+    }
+    return rcsstore;
+}

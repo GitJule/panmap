@@ -16,28 +16,57 @@
 #include <configuration.hpp>
 #include <loadjst.hpp>
 #include <seqan3/search/search.hpp>
+#include <libspm/matcher/horspool_matcher.hpp>
+#include <libjst/sequence_tree/volatile_tree.hpp>
+#include <libjst/sequence_tree/labelled_tree.hpp>
+#include <libjst/sequence_tree/coloured_tree.hpp>
+#include <libjst/sequence_tree/trim_tree.hpp>
+#include <libjst/sequence_tree/prune_tree.hpp>
+#include <libjst/sequence_tree/merge_tree.hpp>
+#include <libjst/sequence_tree/seekable_tree.hpp>
+#include <libjst/traversal/tree_traverser_base.hpp>
+#include <libjst/sequence_tree/left_extend_tree.hpp>
 
 
-struct jst_adapter 
+// struct jst_adapter 
+// {
+//     using iterator = typename std::vector<seqan3::dna5_vector>::const_iterator;
+    
+//     const JST_Data& data;
+    
+//     size_t size() const { return data.sequences.size(); }
+//     auto operator[](size_t i) const { return std::views::all(data.sequences[i]); }
+
+//     iterator begin() const { return data.sequences.begin(); }
+//     iterator end() const { return data.sequences.end(); }
+// };
+
+std::vector<size_t> jst_search(const auto& jst_data, const reference_t & read)
 {
-    using iterator = typename std::vector<seqan3::dna5_vector>::const_iterator;
+    // auto config = seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{0}} //keine fehler erlaubt
+    //             | seqan3::search_cfg::hit_all_best{}; // beste treffer zurückgeben
     
-    const JST_Data& data;
-    
-    size_t size() const { return data.sequences.size(); }
-    auto operator[](size_t i) const { return std::views::all(data.sequences[i]); }
+    // auto results = seqan3::search(read, jst_adapter{jst_data}, config);
+    spm::horspool_matcher matcher{query};
 
-    iterator begin() const { return data.sequences.begin(); }
-    iterator end() const { return data.sequences.end(); }
-};
+    auto search_tree = libjst::make_volatile(jst_data) | libjst::labelled()
+    | libjst::coloured()
+    | libjst::trim(spm::window_size(matcher) - 1)
+    | libjst::prune()
+    | libjst::left_extend(spm::window_size(matcher) - 1)
+    | libjst::merge() // make big nodes
+    | libjst::seek();
 
-std::vector<size_t> jst_search(const auto& jst_data, const seqan3::dna5_vector& read)
-{
-    auto config = seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{0}} //keine fehler erlaubt
-                | seqan3::search_cfg::hit_all_best{}; // beste treffer zurückgeben
-    
-    auto results = seqan3::search(read, jst_adapter{jst_data}, config);
-    
+    libjst::tree_traverser_base oblivious_path{search_tree};
+    for (auto it = oblivious_path.begin(); it != oblivious_path.end(); ++it) {
+         auto && cargo = *it;
+         matcher(cargo.sequence(), [&] ([[maybe_unused]] auto && label_finder) {
+            std::cout<<"Found hit. Yayy." << cargo.position() <<"\n";
+            // callback(query, match_position{.tree_position{cargo.position()},
+                                        //    .label_offset{std::ranges::ssize(cargo.sequence()) - seqan2::endPosition(label_finder)}});
+        });
+}
+
     std::vector<size_t> hits;
     for (auto&& result : results)
         hits.push_back(result.reference_begin_position());
@@ -50,7 +79,7 @@ void map_reads(std::filesystem::path const & query_path,
     const JST_Data & jst_data,
     uint8_t const errors)
 {
-    seqan3::sequence_file_input query_file_in{query_path};
+    sequence_file_t query_file_in{query_path};
     seqan3::sam_file_output sam_out{sam_path, seqan3::fields<seqan3::field::seq,
                                               seqan3::field::id,
                                               seqan3::field::ref_id, 

@@ -109,7 +109,8 @@ void map_reads(std::filesystem::path const & query_path,
         seqan3::align_cfg::output_alignment{} |
         seqan3::align_cfg::output_begin_position{} | 
         seqan3::align_cfg::output_score{};
- 
+
+
     for (auto && record : query_file_in) // beginnt Schleife, die jeden Eintrag in der Query-Datei durchläuft
     {
         auto & query = record.sequence(); // referenziert die Sequenz des aktuellen Eintrags
@@ -117,23 +118,23 @@ void map_reads(std::filesystem::path const & query_path,
        
         for (auto hit_pos : hits)
         {
-                // std::span text_view{std::data(jst_data.sequences[hit_pos]), query.size() +1};
-                std::cout <<"seek position:"<< hit_pos << "\n";
+            std::span text_view{std::data(jst_data.sequence[hit_pos]), query.size()};
+            std::cout <<"seek position:"<< hit_pos << "\n";
             
-            //     for (auto&& alignment : seqan3::align_pairwise(std::tie(text_view,query), align_config))
-            // {
-            // auto cigar = seqan3::cigar_from_alignment(alignment.alignment()); // wandelt das Alignment in einen CIGAR-String um
-            // size_t ref_offset = alignment.sequence1_begin_position() + 2; // berechnet Offset in der Referenzsequenz basierend auf der Ausrichtung
-            // size_t map_qual = 60u + alignment.score(); // berechnet die Mapping-Qualität basierend auf dem Ausrichtungsscore
-            //     //fängt einen neuen Eintrag zur SAM-Datei hinzu
-            //     sam_out.emplace_back(query,
-            //                          record.id(),
-            //                          jst_data.ids[hit_pos], 
-            //                          ref_offset,
-            //                          cigar,
-            //                          record.base_qualities(),
-            //                          map_qual);
-            // }
+            for (auto&& alignment : seqan3::align_pairwise(std::tie(text_view,query), align_config))
+        {
+            auto cigar = seqan3::cigar_from_alignment(alignment.alignment()); // wandelt das Alignment in einen CIGAR-String um
+            size_t ref_offset = alignment.sequence1_begin_position() + 1; // berechnet Offset in der Referenzsequenz basierend auf der Ausrichtung
+            size_t map_qual = 60u + alignment.score(); // berechnet die Mapping-Qualität basierend auf dem Ausrichtungsscore
+                //fängt einen neuen Eintrag zur SAM-Datei hinzu
+                sam_out.emplace_back(query,
+                                     record.id(),
+                                     jst_data.ids[hit_pos], 
+                                     ref_offset,
+                                     cigar,
+                                     record.base_qualities(),
+                                     map_qual);
+            }
         }
     }
 }

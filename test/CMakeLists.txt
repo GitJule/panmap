@@ -13,6 +13,7 @@ include (data/datasources.cmake)
 
 add_app_test (loadrcsstore_test.cpp)
 add_app_test (traverse_jst_test.cpp)
+add_app_test (generator_test.cpp)
 # add_app_test (cli_fastq_coversion_test.cpp)
 
 message (STATUS "You can run `make check` to build and run tests.")
@@ -23,3 +24,5 @@ find_package(seqan3 3.4 REQUIRED COMPONENTS algorithm)
 # Compiler-Optionen
 add_compile_options(-ftemplate-depth=1024)
 add_compile_options(-fconserve-space)
+
+

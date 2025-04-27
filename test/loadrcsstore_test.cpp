@@ -18,6 +18,8 @@ TEST(test, create_rcs) {
 
 TEST(test, loadrcsstore){
     auto rcsstorepath = std::filesystem::path{std::string{DATADIR}}.concat("test.jst");
-    rcs_store_t store = loadrcsstore(rcsstorepath);
+    rcs_store_t store = loadjst(rcsstorepath);
     EXPECT_EQ(store.size(), 5);
 }
+
+
